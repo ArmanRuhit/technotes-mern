@@ -99,7 +99,7 @@ const deleteUser = expressAsyncHandler(async (req, res) => {
     const notes = await Note.findOne({ user: id }).lean().exec();
 
     if (notes?.length) {
-        return res.status(400).({ message: "User has assigned notes" });
+        return res.status(400).json({ message: "User has assigned notes" });
     }
 
     const user = await User.findById(id).exec();
