@@ -11,7 +11,7 @@ const salt = 10;
 const getAllUsers = expressAsyncHandler(async (req, res) => {
     const users = await User.find().select('-password').lean();
 
-    if (!users) {
+    if (!users || !users.length) {
         return res.status(404).json({ message: "No users found" });
     }
 
@@ -31,14 +31,14 @@ const createNewUser = expressAsyncHandler(async (req, res) => {
 
     const duplicate = await User.findOne({ username }).lean().exec();
 
-    if (!duplicate) {
+    if (duplicate) {
         return res.status(409).json({ message: "Duplicate username" });
     }
 
     //hash password
     const hashPwd = await bcrypt.hash(password, salt) //salt round
 
-    const userObj = { user, "password": hashPwd, roles };
+    const userObj = { username, "password": hashPwd, roles };
 
     const user = await User.create(userObj);
 
@@ -54,7 +54,6 @@ const createNewUser = expressAsyncHandler(async (req, res) => {
 //@acess Private
 const updateUser = expressAsyncHandler(async (req, res) => {
     const { id, username, roles, active, password } = req.body;
-
 
     //confirm data
     if (!id || !username || !Array.isArray(roles) || !roles.length || typeof active === 'boolean') {
@@ -95,14 +94,15 @@ const deleteUser = expressAsyncHandler(async (req, res) => {
     if (!id) {
         return res.status(400).json({ message: "All fields are required" });
     }
-    
+    console.log("hello");
     const notes = await Note.findOne({ user: id }).lean().exec();
-
+    console.log(notes);
     if (notes?.length) {
         return res.status(400).json({ message: "User has assigned notes" });
     }
 
     const user = await User.findById(id).exec();
+    console.log(user);
 
     if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -111,6 +111,8 @@ const deleteUser = expressAsyncHandler(async (req, res) => {
     const result = await user.deleteOne();
 
     const reply = `Username ${result.username} `
+
+    res.status(200).json({message: `${reply} with id ${id} removed`});
 });
 
 module.exports = {
