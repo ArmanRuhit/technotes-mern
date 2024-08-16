@@ -11,6 +11,9 @@ import NoteList from './features/notes/NoteList';
 
 import UserList from './features/users/UserList';
 
+import { Store } from './app/store';
+import { Provider } from 'react-redux';
+
 function App() {
   return (
     <Routes>
